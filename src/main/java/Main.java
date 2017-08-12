@@ -10,7 +10,10 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"));
         primaryStage.setTitle("AK LiveCode");
-        primaryStage.setScene(new Scene(root, 900, 600));
+        Scene scene = new Scene(root, 900, 600);
+        scene.getStylesheets().add(this.getClass().getClassLoader().getResource("app.css").toExternalForm());
+        primaryStage.setScene(scene);
+
         primaryStage.show();
     }
 

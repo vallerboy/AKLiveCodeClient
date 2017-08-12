@@ -5,7 +5,7 @@ package models;
  */
 public class MessageModel {
     public enum MessageType{
-        REGISTER, DOWNLOAD_REQUEST, UPDATING, DOWNLOAD_RESPONSE, JOIN, REQUEST_ALL_USER, REGISTER_RESPONSE;
+        REGISTER, DOWNLOAD_REQUEST, UPDATING, DOWNLOAD_RESPONSE, JOIN, REQUEST_ALL_USER, REGISTER_RESPONSE, UPDATE_ALL;
     }
 
     private String toWho;

@@ -10,10 +10,10 @@ import java.nio.file.StandardOpenOption;
  * Created by Lenovo on 23.07.2017.
  */
 public class FileUtils {
-    public static String readAllFile(Path path){
+    public static String readAllFile(String path){
         StringBuilder stringBuilder = new StringBuilder();
         try {
-            for (String s : Files.readAllLines(path)) {
+            for (String s : Files.readAllLines(new File(path).toPath())) {
                 stringBuilder.append(s).append("\n");
             }
         } catch (IOException e) {
@@ -22,9 +22,9 @@ public class FileUtils {
         return stringBuilder.toString();
     }
 
-    public static void saveFile(Path path, byte[] bytes){
+    public static void saveFile(String  path, byte[] bytes){
         try {
-            Files.write(path, bytes, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.write(new File(path).toPath(), bytes, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }

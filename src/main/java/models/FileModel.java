@@ -2,6 +2,7 @@ package models;
 
 import models.components.FileUtils;
 
+import java.io.File;
 import java.nio.file.Path;
 
 /**
@@ -9,15 +10,18 @@ import java.nio.file.Path;
  */
 public class FileModel {
     private String name;
-    private Path path;
-    private String content;
+    private  String path;
+    private  String content;
     private String author;
 
     public FileModel(String name, Path path) {
         this.name = name;
-        this.path = path;
+        this.path = path.toAbsolutePath().toString();
 
-        content = FileUtils.readAllFile(path);
+        content = FileUtils.readAllFile(this.path);
+    }
+
+    public FileModel() {
     }
 
     public String getAuthor() {
@@ -44,11 +48,11 @@ public class FileModel {
         this.name = name;
     }
 
-    public Path getPath() {
+    public String getPath() {
         return path;
     }
 
-    public void setPath(Path path) {
+    public void setPath(String path) {
         this.path = path;
     }
 

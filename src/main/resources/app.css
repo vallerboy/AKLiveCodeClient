@@ -1,0 +1,6 @@
+.list-cell:filled:selected {
+    -fx-text-fill: red;
+}
+.root{
+    -fx-selection-bar-text: red;
+}

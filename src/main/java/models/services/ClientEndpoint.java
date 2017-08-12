@@ -15,13 +15,6 @@ import java.util.List;
 @javax.websocket.ClientEndpoint
 public class ClientEndpoint {
 
-    private static ClientEndpoint clientEndpoint = new ClientEndpoint();
-    public static ClientEndpoint getClientEndpoint() {
-        return clientEndpoint;
-    }
-    public static void init(String room) {
-       roomName = room;
-    }
 
     private static String roomName = "test";
     private Session session;
@@ -30,6 +23,10 @@ public class ClientEndpoint {
 
     public ClientEndpoint() {
         container = ContainerProvider.getWebSocketContainer();
+    }
+
+
+    public void init(){
         URI uri = URI.create("ws://localhost:8080/live/" + "test");
         try {
             container.connectToServer(this, uri);

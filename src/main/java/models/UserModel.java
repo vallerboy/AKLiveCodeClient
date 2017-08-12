@@ -1,26 +1,30 @@
 package models;
 
+import com.google.gson.annotations.SerializedName;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 /**
  * Created by Lenovo on 23.07.2017.
  */
-public class UserModel {
+public class UserModel implements Serializable{
 
-    private static final UserModel userModel = new UserModel();
+    private transient static final UserModel userModel = new UserModel();
     public static UserModel getUser() {
         return userModel;
     }
 
 
     private String name;
-    private ObservableList<FileModel> files;
+    private ArrayList<FileModel> files;
 
-    private UserModel(){
-        files =  FXCollections.observableArrayList();
+    public UserModel(){
+        files =  new ArrayList<>();
     }
 
 
@@ -33,11 +37,13 @@ public class UserModel {
         files.add(model);
     }
 
-    public ObservableList<FileModel> getFiles() {
+    public ArrayList<FileModel> getFiles() {
         return files;
     }
 
     public void setName(String name) {
         this.name = name;
     }
+
+
 }
