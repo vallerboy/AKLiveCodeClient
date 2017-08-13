@@ -1,6 +1,5 @@
-package models.components;
+package pl.oskarpolak.models.components;
 
-import javafx.scene.Scene;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;

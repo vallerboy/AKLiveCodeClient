@@ -1,8 +1,7 @@
-package models;
+package pl.oskarpolak.models;
 
-import models.components.FileUtils;
+import pl.oskarpolak.models.components.FileUtils;
 
-import java.io.File;
 import java.nio.file.Path;
 
 /**
@@ -13,6 +12,7 @@ public class FileModel {
     private  String path;
     private  String content;
     private String author;
+    private int cursor;
 
     public FileModel(String name, Path path) {
         this.name = name;
@@ -77,5 +77,13 @@ public class FileModel {
     @Override
     public String toString() {
         return name;
+    }
+
+    public int getCursor() {
+        return cursor;
+    }
+
+    public void setCursor(int cursor) {
+        this.cursor = cursor;
     }
 }

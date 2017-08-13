@@ -1,16 +1,19 @@
-package models;
+package pl.oskarpolak.models;
 
 /**
  * Created by Lenovo on 23.07.2017.
  */
 public class MessageModel {
     public enum MessageType{
-        REGISTER, DOWNLOAD_REQUEST, UPDATING, DOWNLOAD_RESPONSE, JOIN, REQUEST_ALL_USER, REGISTER_RESPONSE, UPDATE_ALL;
+        REGISTER, DISCONNECT, DOWNLOAD_REQUEST, UPDATING, DOWNLOAD_RESPONSE, JOIN, REQUEST_ALL_USER, REGISTER_RESPONSE, UPDATE_ALL;
     }
 
     private String toWho;
     private String context;
     private MessageType messageType;
+
+
+
 
     public String getToWho() {
         return toWho;

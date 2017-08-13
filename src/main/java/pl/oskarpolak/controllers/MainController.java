@@ -1,4 +1,4 @@
-package controllers;
+package pl.oskarpolak.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,27 +12,23 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
-import models.FileModel;
-import models.IMessageObserver;
-import models.MessageModel;
-import models.UserModel;
-import models.components.Editor;
-import models.components.FileUtils;
-import models.services.ClientEndpoint;
+import pl.oskarpolak.models.FileModel;
+import pl.oskarpolak.models.IMessageObserver;
+import pl.oskarpolak.models.MessageModel;
+import pl.oskarpolak.models.UserModel;
+import pl.oskarpolak.models.components.Editor;
+import pl.oskarpolak.models.components.FileUtils;
+import pl.oskarpolak.models.services.ClientEndpoint;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable, IMessageObserver {
@@ -63,16 +59,19 @@ public class MainController implements Initializable, IMessageObserver {
     private int cursorPosition = 0;
 
 
-    private ClientEndpoint endpoint = new ClientEndpoint();
+    private ClientEndpoint endpoint = ClientEndpoint.getConnection();
 
     public void initialize(URL location, ResourceBundle resources) {
-        endpoint.init();
+
 
         otherUserFiles = new ArrayList<>();
 
-        localUser.setName(registerNickname());
-        register();
         requestAllUser();
+
+
+
+        userList.getSelectionModel().select(localUser.getName());
+        observe = localUser.getName();
 
         endpoint.registerObserver(this);
 
@@ -81,44 +80,32 @@ public class MainController implements Initializable, IMessageObserver {
         classText.getChildren().add(Editor.buildArea(codeArea));
 
         fileArea.setItems(FXCollections.observableArrayList(localUser.getFiles()));
-        userItemList.add("Ty to " + localUser.getName());
         userList.setItems(userItemList);
 
         codeArea.setStyle("-fx-font-size: 1.5em;");
         codeArea.setOnKeyTyped(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) {
                     fileArea.getSelectionModel().getSelectedItem().setContent(codeArea.getText());
-                    cursorPosition = codeArea.getCaretPosition();
                     if(observe != null && observe.equals(localUser.getName())) {
                     FileUtils.saveFile(fileArea.getSelectionModel().getSelectedItem().getPath(), codeArea.getText().getBytes());
                     }
+                    fileArea.getSelectionModel().getSelectedItem().setCursor(codeArea.getCaretPosition());
                     updateProject(fileArea.getSelectionModel().getSelectedItem());
-                System.out.println("Położenie kursora: " + cursorPosition);
+                    System.out.println("Wysyłam update do obserwatorów");
+
             }
         });
         //todo pozycja kursora musi się odswieżać na swojej pozycji
         codeArea.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-                System.out.println("Pozycja v2: " + cursorPosition);
-                codeArea.displaceCaret(cursorPosition);
+                //codeArea.displaceCaret(cursorPosition);
             }
         });
 
     }
 
-    private String registerNickname() {
-        TextInputDialog dialog = new TextInputDialog("Oskar");
-        dialog.setTitle("Ustaw swój nick");
-        dialog.setHeaderText("Inni muszą Cię rozpoznać..");
-        dialog.setContentText("Nick:");
 
-        Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            return result.get();
-        }
-        return null;
-    }
 
 
     private void initHandlers() {
@@ -190,23 +177,13 @@ public class MainController implements Initializable, IMessageObserver {
 
 
     @Override
-    public void onNewMessage(ByteBuffer byteBuffer) {
-        Type type = new TypeToken<MessageModel>() {
-        }.getType();
-        MessageModel messageModel = gson.fromJson(new String(byteBuffer.array()), type);
-
+    public void onNewMessage(MessageModel messageModel) {
 
         switch (messageModel.getMessageType()) {
             case DOWNLOAD_REQUEST: {
                 String toWho = messageModel.getToWho();
                 currentSession = toWho;
                 sendProjectTo(toWho);
-                break;
-            }
-            case JOIN: {
-                Platform.runLater(() -> {
-                    userItemList.add(messageModel.getContext());
-                });
                 break;
             }
             case REQUEST_ALL_USER: {
@@ -232,15 +209,22 @@ public class MainController implements Initializable, IMessageObserver {
 
                 break;
             }
-            case REGISTER_RESPONSE: {
-                System.out.println("Wiadomość od serwera: " + messageModel.getContext());
+
+            case DISCONNECT: {
+                Platform.runLater(() ->  userItemList.remove(messageModel.getToWho()));
                 break;
             }
-
+            case JOIN: {
+                Platform.runLater(() -> {
+                    userItemList.add(messageModel.getContext());
+                });
+                break;
+            }
             case UPDATING: {
-                if(observe != null && observe.equals(localUser.getName())){
-                    break;
-                }
+                System.out.println("Przychodzi udpdate od kogoś");
+//                if(observe != null && observe.equals(localUser.getName())){
+//                    break;
+//                }
                 FileModel fileModel = gson.fromJson(messageModel.getContext(), FileModel.class);
                 updateFile(fileModel);
 
@@ -248,7 +232,15 @@ public class MainController implements Initializable, IMessageObserver {
                     if(fileArea.getSelectionModel().getSelectedItem() != null &&
                             fileArea.getSelectionModel().getSelectedItem().equals(fileModel)) {
                         codeArea.replaceText(fileModel.getContent());
-
+                        codeArea.displaceCaret(fileModel.getCursor());
+                        System.out.println("Ustawiam kursor na " + fileModel.getCursor());
+                    }else{
+                        for (FileModel model : localUser.getFiles()) {
+                            if(model.equals(fileModel)){
+                                model.setContent(fileModel.getContent());
+                            }
+                        }
+                        System.out.println("Jakiś nieaktywny user edytuje plik");
                     }
                 });
 
@@ -261,14 +253,6 @@ public class MainController implements Initializable, IMessageObserver {
         }
     }
 
-    private void sendMessage(MessageModel model) {
-        String message = gson.toJson(model);
-        try {
-            endpoint.getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(message.getBytes()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void sendProjectTo(String name) {
         System.out.println("Name: " + name);
@@ -279,29 +263,22 @@ public class MainController implements Initializable, IMessageObserver {
         Type listType = new TypeToken<UserModel>() {
         }.getType();
         model.setContext(gson.toJson(localUser, listType));
-        sendMessage(model);
+        endpoint.sendMessage(model);
 
     }
 
-    //todo dupa dupa dupa, tego nie powinno tu być
-    private void register() {
-        MessageModel model = new MessageModel();
-        model.setMessageType(MessageModel.MessageType.REGISTER);
-        model.setContext(localUser.getName());
-        sendMessage(model);
-    }
 
     private void requestAllUser() {
         MessageModel model = new MessageModel();
         model.setMessageType(MessageModel.MessageType.REQUEST_ALL_USER);
-        sendMessage(model);
+        endpoint.sendMessage(model);
     }
 
     private void getProjectFrom(String newValue) {
         MessageModel model = new MessageModel();
         model.setMessageType(MessageModel.MessageType.DOWNLOAD_REQUEST);
         model.setToWho(newValue);
-        sendMessage(model);
+        endpoint.sendMessage(model);
         System.out.println("Wysłałem zapytanie o pliczki");
     }
 
@@ -309,8 +286,19 @@ public class MainController implements Initializable, IMessageObserver {
         MessageModel model = new MessageModel();
         model.setMessageType(MessageModel.MessageType.UPDATING);
         model.setContext(gson.toJson(fileModel));
-        sendMessage(model);
+
+        endpoint.sendMessage(model);
     }
+
+    private void disconnect() {
+        MessageModel model = new MessageModel();
+        model.setMessageType(MessageModel.MessageType.DISCONNECT);
+        model.setToWho(localUser.getName());
+
+        endpoint.sendMessage(model);
+    }
+
+
 
     private void updateFile(FileModel fileModel) {
         otherUserFiles.stream()

@@ -1,13 +1,7 @@
-package models;
-
-import com.google.gson.annotations.SerializedName;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+package pl.oskarpolak.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
 
 /**
  * Created by Lenovo on 23.07.2017.
@@ -22,11 +16,23 @@ public class UserModel implements Serializable{
 
     private String name;
     private ArrayList<FileModel> files;
+    private transient boolean isLogged;
 
     public UserModel(){
         files =  new ArrayList<>();
     }
 
+
+
+
+
+    public boolean isLoged() {
+        return isLogged;
+    }
+
+    public void setLogged(boolean isLogged) {
+        isLogged = isLogged;
+    }
 
     public String getName() {
         return name;
