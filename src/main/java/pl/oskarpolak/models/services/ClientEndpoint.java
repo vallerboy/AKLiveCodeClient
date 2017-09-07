@@ -116,7 +116,7 @@ public class ClientEndpoint {
         observerList.forEach(s -> {
             Type type = new TypeToken<MessageModel>() {}.getType();
             MessageModel messageModel = gson.fromJson(new String(buffer.array()), type);
-            s.onNewMessage(messageModel);
+            Platform.runLater(() ->  s.onNewMessage(messageModel));
         });
         executorService.shutdownNow();
     }

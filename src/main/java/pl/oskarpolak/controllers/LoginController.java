@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import pl.oskarpolak.AppStarter;
 import pl.oskarpolak.models.*;
@@ -24,7 +25,8 @@ import java.util.ResourceBundle;
  */
 public class LoginController implements Initializable, ISocketConnection, IMessageObserver{
 
-
+	// Login Controller witam youtube
+	// HEJ!
     @FXML
     JFXTextField textNick;
 
@@ -34,11 +36,12 @@ public class LoginController implements Initializable, ISocketConnection, IMessa
     @FXML
     JFXButton buttonConnect;
 
-    @FXML
-    JFXButton buttonNewRoom;
 
     @FXML
     JFXSpinner spinnerLogin;
+
+    @FXML
+    Label textInfo;
 
 
     private Stage stage;
@@ -100,6 +103,8 @@ public class LoginController implements Initializable, ISocketConnection, IMessa
                     MessagesUtils.createSimpleDialog("Nazwa użytkownika", "Ta nazwa jest już zajęta w tym pokoju");
                     textNick.requestFocus();
                     buttonConnect.setDisable(false);
+                    spinnerLogin.setVisible(false);
+                    System.out.println("Nazwa zajęta");
                     break;
                 }
 
